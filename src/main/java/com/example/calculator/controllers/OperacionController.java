@@ -32,12 +32,10 @@ public class OperacionController {
 
     @GetMapping("/")
     public ResponseEntity<?> ejecutarOperacion(@RequestParam BigDecimal operador1 , @RequestParam BigDecimal operador2, @RequestParam String operacion){
-        System.out.println("THIS.OPERACIONES: "+this.operaciones.size());
         Optional<Operacion> operacionImpl = operaciones.stream()
                 .filter(op ->
                         op.getClass().getSimpleName().equalsIgnoreCase(operacion))
                 .findFirst();
-        System.out.println("operacionImpl "+operacionImpl);
         if (operacionImpl.isPresent()) {
             var result = operacionImpl.get().calcular(operador1, operador2).toString();
             tracer.trace(result);
