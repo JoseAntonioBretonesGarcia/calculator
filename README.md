@@ -121,8 +121,8 @@ Calculator demo with SpringBoot project
 	
 	- Para sumar dos números:
 						
-							GET -> "http://localhost:8080/calculadora/?operador1=2&operador2=2&operacion=suma"
+							GET -> "http://localhost:8080/calculadora/operacion/?operador1=2&operador2=2&operacion=suma"
 			
 	- Para restar dos números:
 			
-							GET -> "http://localhost:8080/calculadora/?operador1=2&operador2=2&operacion=resta"
+							GET -> "http://localhost:8080/calculadora/operacion/?operador1=2&operador2=2&operacion=resta"
