@@ -115,10 +115,14 @@ Calculator demo with SpringBoot project
 	Si queremos probar los servicios en un cliente como Postman o simplemente saber 
 	el endpoint para hacer el request desde una aplicación frontal, aquí dejo un par de endpoints de ejemplo:
 	
+	- Comprobar operaciones disponibles:
+	
+							GET ->	"http://localhost:8080/calculadora/listado/operaciones"
+	
 	- Para sumar dos números:
 						
-						"http://localhost:8080/api/?operador1=2&operador2=2&operacion=suma"
+							GET -> "http://localhost:8080/api/?operador1=2&operador2=2&operacion=suma"
 			
 	- Para restar dos números:
 			
-						"http://localhost:8080/api/?operador1=2&operador2=2&operacion=resta"
+							GET -> "http://localhost:8080/api/?operador1=2&operador2=2&operacion=resta"
