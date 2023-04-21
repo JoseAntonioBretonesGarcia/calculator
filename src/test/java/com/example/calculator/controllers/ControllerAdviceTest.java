@@ -1,41 +1,56 @@
 package com.example.calculator.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.example.calculator.constants.MensajesError;
 import com.example.calculator.exceptions.CustomIllegalArgumentException;
+import com.example.calculator.interfaces.Operacion;
+import com.example.calculator.services.OperacionService;
 import io.corp.calculator.TracerImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.List;
 
 @WebMvcTest
 @DisplayName("ControllerAdviceTest")
-public class ControllerAdviceTest {
+@ExtendWith(SpringExtension.class)
+class ControllerAdviceTest {
 
     @InjectMocks
-    private ControllerAdvice advice;
+    ControllerAdvice advice;
 
     @MockBean
-    private TracerImpl tracerMock;
+    TracerImpl tracerMock;
+
+    @MockBean
+    List<Operacion> operaciones;
+
+    @MockBean
+    OperacionService operacionService;
+
 
     @BeforeEach
-    public void init() {
+    void init() {
         advice = new ControllerAdvice(tracerMock);
     }
 
     @Test
     @DisplayName("ControllerAdviceTest-illegalArgumentExceptionHandlerTest")
-    public void customIllegalArgumentException() throws Exception {
-        CustomIllegalArgumentException exception = new CustomIllegalArgumentException("Los operadores para realizar el cálculo deben ser números.");
+    void customIllegalArgumentException() throws Exception {
+        CustomIllegalArgumentException exception = new CustomIllegalArgumentException(MensajesError.OPERACION_NO_DISPONIBLE);
         assertEquals(advice.customIllegalArgumentException(exception).getStatusCode().value(), 400);
     }
 
     @Test
     @DisplayName("ControllerAdviceTest-numberFormatExceptionHandlerTest")
-    public void numberFormatExceptionHandlerTest() {
-        NumberFormatException exception = new NumberFormatException("Los operadores para realizar el cálculo deben ser números.");
-        assertEquals(advice.numberFormatExceptionHandler(exception).getStatusCode().value(), 400);
+    void numberFormatExceptionHandlerTest() {
+        assertEquals(advice.numberFormatExceptionHandler().getStatusCode().value(), 400);
     }
 }

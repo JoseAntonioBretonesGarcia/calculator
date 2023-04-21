@@ -1,62 +1,66 @@
 package com.example.calculator.controllers;
 
+import com.example.calculator.exceptions.CustomIllegalArgumentException;
 import com.example.calculator.interfaces.Operacion;
 import com.example.calculator.models.Suma;
+import com.example.calculator.services.OperacionService;
 import io.corp.calculator.TracerImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 @DisplayName("OperacionControllerTest")
-public class OperacionControllerTest {
+@ExtendWith(SpringExtension.class)
+class OperacionControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @MockBean
-    private TracerImpl tracerMock;
+    TracerImpl tracerMock;
 
-    @Mock
-    private List<Operacion> operaciones;
+    @MockBean
+    List<Operacion> operaciones;
 
-    @InjectMocks
-    private OperacionController controller;
+    @MockBean
+    OperacionService operacionService;
 
-    @BeforeEach
-    public void init() {
-        controller = new OperacionController(operaciones, tracerMock);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    @MockBean
+    ControllerAdvice controllerAdvice;
+
+
+    @Test
+    @DisplayName("OperacionControllerTest-ejecutarListadoOperacionesTest")
+    void ejecutarListadoOperacionesTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/calculadora/listado/operaciones")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
 
     @Test
     @DisplayName("OperacionControllerTest-ejecutarOperacionSumaValidaTest")
-    public void ejecutarOperacionSumaValidaTest() throws Exception {
+    void ejecutarOperacionSumaValidaTest() throws Exception {
         Suma suma = new Suma();
         when(operaciones.stream()).thenReturn(Stream.of(suma));
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/calculadora/operacion/")
                         .param("operador1","1")
                         .param("operador2","1")
                         .param("operacion","suma")
@@ -67,41 +71,41 @@ public class OperacionControllerTest {
 
     @Test
     @DisplayName("OperacionControllerTest-ejecutarOperacionSumaNoValidaTest")
-    public void ejecutarOperacionSumaNoValidaTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/")
+    void ejecutarOperacionSumaNoValidaTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/calculadora/operacion/")
                         .param("operador1", "1")
                         .param("operador2", "1")
                         .param("operacion", "sumaa")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof CustomIllegalArgumentException));
     }
 
     @Test
     @DisplayName("OperacionControllerTest-ejecutarOperacionSumaOperador1NoValidoTest")
-    public void ejecutarOperacionSumaOperador1NoValidoTest() throws Exception {
+    void ejecutarOperacionSumaOperador1NoValidoTest() throws Exception {
         Suma suma = new Suma();
         when(operaciones.stream()).thenReturn(Stream.of(suma));
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/calculadora/operacion/")
                         .param("operador1","h")
                         .param("operador2","1")
                         .param("operacion","suma")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentTypeMismatchException));
     }
 
     @Test
     @DisplayName("OperacionControllerTest-ejecutarOperacionSumaOperador2NoValidoTest")
-    public void ejecutarOperacionSumaOperador2NoValidoTest() throws Exception {
+    void ejecutarOperacionSumaOperador2NoValidoTest() throws Exception {
         Suma suma = new Suma();
         when(operaciones.stream()).thenReturn(Stream.of(suma));
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/calculadora/operacion/")
                         .param("operador1","1")
                         .param("operador2","t")
                         .param("operacion","suma")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentTypeMismatchException));
     }
 }

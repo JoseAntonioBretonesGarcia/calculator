@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 @DisplayName("CustomIllegalArgumentExceptionTest")
-public class CustomIllegalArgumentExceptionTest {
+class CustomIllegalArgumentExceptionTest {
 
     @Mock
     CustomIllegalArgumentException customIllegalArgumentException;
 
     @Test
     @DisplayName("CustomIllegalArgumentExceptionTest - customIllegalArgumentExceptionTest")
-    public void customIllegalArgumentExceptionTest() {
+    void customIllegalArgumentExceptionTest() {
         customIllegalArgumentException = new CustomIllegalArgumentException("Probando excepción propia");
     }
 
