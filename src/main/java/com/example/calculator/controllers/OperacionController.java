@@ -1,46 +1,44 @@
 package com.example.calculator.controllers;
 
+import com.example.calculator.constants.MensajesError;
+import com.example.calculator.dtos.ListadoOperacionesDTO;
+import com.example.calculator.dtos.ResultadoOperacionDTO;
 import com.example.calculator.exceptions.CustomIllegalArgumentException;
 import com.example.calculator.interfaces.Operacion;
+import com.example.calculator.services.OperacionService;
 import io.corp.calculator.TracerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/calculadora")
 public class OperacionController {
 
 
-    private final List<Operacion> operaciones;
-    private final TracerImpl tracer;
+    @Autowired
+    TracerImpl tracer;
 
     @Autowired
-    public OperacionController(List<Operacion> operations,TracerImpl tracer) {
-        this.operaciones = operations;
-        this.tracer = tracer;
+    OperacionService operacionService;
+
+    @GetMapping("/listado/operaciones")
+    public ResponseEntity<ListadoOperacionesDTO> getOperaciones(){
+        ListadoOperacionesDTO listadoOperacionesDTO =new ListadoOperacionesDTO(operacionService.getOperaciones());
+        tracer.trace(listadoOperacionesDTO.operacionesDisponibles);
+        return new ResponseEntity<>(listadoOperacionesDTO,HttpStatus.OK);
     }
-
-
-    @GetMapping("/")
-    public ResponseEntity<?> ejecutarOperacion(@RequestParam BigDecimal operador1 , @RequestParam BigDecimal operador2, @RequestParam String operacion){
-        Optional<Operacion> operacionImpl = operaciones.stream()
-                .filter(op ->
-                        op.getClass().getSimpleName().equalsIgnoreCase(operacion))
-                .findFirst();
-        if (operacionImpl.isPresent()) {
-            var result = operacionImpl.get().calcular(operador1, operador2).toString();
-            tracer.trace(result);
-            return new ResponseEntity<>("El resultado es: ".concat(result),HttpStatus.OK);
-        }
-            throw new CustomIllegalArgumentException("No existe actualmente ese tipo de operación.");
+    @GetMapping("/operacion/")
+    public ResponseEntity<ResultadoOperacionDTO> ejecutarOperacion(@RequestParam BigDecimal operador1 , @RequestParam BigDecimal operador2, @RequestParam String operacion){
+        Optional<Operacion> operacionImpl = operacionService.buscarOperacion(operacion);
+        operacionImpl.orElseThrow(() ->  new CustomIllegalArgumentException(MensajesError.OPERACION_NO_DISPONIBLE));
+        var resultado = operacionImpl.get().calcular(operador1, operador2).toString();
+        ResultadoOperacionDTO resultadoOperacionDTO = new ResultadoOperacionDTO(resultado) ;
+        tracer.trace(resultado);
+        return new ResponseEntity<>(resultadoOperacionDTO,HttpStatus.OK);
     }
 }
